@@ -1,4 +1,5 @@
-a = True
-while a:
- a = False
- a = True
+
+def 0a():
+    print("hello")
+
+0a()

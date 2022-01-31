@@ -832,7 +832,7 @@ invalid_arguments:
     | a=expression b=for_if_clauses ',' [args | expression for_if_clauses] {
         RAISE_SYNTAX_ERROR_KNOWN_RANGE(a, PyPegen_last_item(b, comprehension_ty)->target, "Generator expression must be parenthesized") }
     | a=NAME b='=' expression for_if_clauses {
-        RAISE_SYNTAX_ERROR_KNOWN_RANGE(a, b, "invalid syntax. Maybe you meant '==' or ':=' instead of '='?")}
+        RAISE_SYNTAX_ERROR_KNOWN_RANGE(a, b, "invalid syntax. Maybe you meant '==' or ':=' instead of '='? 835")}
     | a=args b=for_if_clauses { _PyPegen_nonparen_genexp_in_call(p, a, b) }
     | args ',' a=expression b=for_if_clauses {
         RAISE_SYNTAX_ERROR_KNOWN_RANGE(a, asdl_seq_GET(b, b->size-1)->target, "Generator expression must be parenthesized") }
@@ -841,7 +841,7 @@ invalid_kwarg:
     | a[Token*]=('True'|'False'|'None') b='=' {
         RAISE_SYNTAX_ERROR_KNOWN_RANGE(a, b, "cannot assign to %s", PyBytes_AS_STRING(a->bytes)) }
     | a=NAME b='=' expression for_if_clauses {
-        RAISE_SYNTAX_ERROR_KNOWN_RANGE(a, b, "invalid syntax. Maybe you meant '==' or ':=' instead of '='?")}
+        RAISE_SYNTAX_ERROR_KNOWN_RANGE(a, b, "invalid syntax. Maybe you meant '==' or ':=' instead of '='? 844")}
     | !(NAME '=') a=expression b='=' {
         RAISE_SYNTAX_ERROR_KNOWN_RANGE(
             a, b, "expression cannot contain assignment, perhaps you meant \"==\"?") }
@@ -868,7 +868,7 @@ invalid_named_expression:
         RAISE_SYNTAX_ERROR_KNOWN_LOCATION(
             a, "cannot use assignment expressions with %s", _PyPegen_get_expr_name(a)) }
     | a=NAME '=' b=bitwise_or !('='|':=') {
-        p->in_raw_rule ? NULL : RAISE_SYNTAX_ERROR_KNOWN_RANGE(a, b, "invalid syntax. Maybe you meant '==' or ':=' instead of '='?") }
+        p->in_raw_rule ? NULL : RAISE_SYNTAX_ERROR_KNOWN_RANGE(a, b, "invalid syntax. Maybe you meant '==' or ':=' instead of '='? 871\n\nThe '=' operator is used for assignment, implying that you are setting %f equal to %f", a, b) }
     | !(list|tuple|genexp|'True'|'None'|'False') a=bitwise_or b='=' bitwise_or !('='|':=') {
         p->in_raw_rule ? NULL : RAISE_SYNTAX_ERROR_KNOWN_LOCATION(a, "cannot assign to %s here. Maybe you meant '==' instead of '='?",
                                           _PyPegen_get_expr_name(a)) }
@@ -1014,6 +1014,9 @@ invalid_for_stmt:
 invalid_def_raw:
     | [ASYNC] a='def' NAME '(' [params] ')' ['->' expression] ':' NEWLINE !INDENT {
         RAISE_INDENTATION_ERROR("expected an indented block after function definition on line %d", a->lineno) }
+    | c='def' NUMBER n=STRING '(' params=[params] ')' a=['->' z=expression { z }] &&':' tc=[func_type_comment] b=block {
+        RAISE_ERROR_KNOWN_LOCATION(p, PyExc_SyntaxError, c->lineno, c->col_offset, n->end_lineno, n->end_col_offset, "Function names cannot be a number!")
+    }
 invalid_class_def_raw:
     | a='class' NAME ['('[arguments] ')'] ':' NEWLINE !INDENT {
         RAISE_INDENTATION_ERROR("expected an indented block after class definition on line %d", a->lineno) }
