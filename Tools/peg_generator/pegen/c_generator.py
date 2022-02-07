@@ -68,6 +68,7 @@ class NodeTypes(Enum):
 
 BASE_NODETYPES = {
     "NAME": NodeTypes.NAME_TOKEN,
+    "INVALIDNAME": NodeTypes.NAME_TOKEN,
     "NUMBER": NodeTypes.NUMBER_TOKEN,
     "STRING": NodeTypes.STRING_TOKEN,
     "SOFT_KEYWORD": NodeTypes.SOFT_KEYWORD,

@@ -405,6 +405,10 @@ function_def_raw[stmt_ty]:
         _PyAST_FunctionDef(n->v.Name.id,
                         (params) ? params : CHECK(arguments_ty, _PyPegen_empty_arguments(p)),
                         b, NULL, a, NEW_TYPE_COMMENT(p, tc), EXTRA) }
+    | 'def' n=INVALIDNAME '(' params=[params] ')' a=['->' z=expression { z }] &&':' tc=[func_type_comment] b=block {
+            _PyAST_FunctionDef(n->v.Name.id,
+                        (params) ? params : CHECK(arguments_ty, _PyPegen_empty_arguments(p)),
+                        b, NULL, a, NEW_TYPE_COMMENT(p, tc), EXTRA);fprintf(stderr, "You are not using a valid function name on line %d column %d.\n", n->lineno, n->col_offset); }
     | ASYNC 'def' n=NAME '(' params=[params] ')' a=['->' z=expression { z }] &&':' tc=[func_type_comment] b=block {
         CHECK_VERSION(
             stmt_ty,
@@ -685,6 +689,7 @@ slice[expr_ty]:
     | a=named_expression { a }
 atom[expr_ty]:
     | NAME
+    | a=INVALIDNAME { fprintf(stderr, "Invalid name used on line %d column %d.\n", a->lineno, a->col_offset) }
     | 'True' { _PyAST_Constant(Py_True, NULL, EXTRA) }
     | 'False' { _PyAST_Constant(Py_False, NULL, EXTRA) }
     | 'None' { _PyAST_Constant(Py_None, NULL, EXTRA) }
@@ -827,6 +832,7 @@ t_primary[expr_ty]:
 t_lookahead: '(' | '[' | '.'
 
 # From here on, there are rules for invalid syntax with specialised error messages
+
 invalid_arguments:
     | a=args ',' '*' { RAISE_SYNTAX_ERROR_KNOWN_LOCATION(a, "iterable argument unpacking follows keyword argument unpacking") }
     | a=expression b=for_if_clauses ',' [args | expression for_if_clauses] {

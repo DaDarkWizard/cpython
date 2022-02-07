@@ -688,7 +688,6 @@ growable_comment_array_deallocate(growable_comment_array *arr) {
 static int
 initialize_token(Parser *p, Token *token, const char *start, const char *end, int token_type) {
     assert(token != NULL);
-
     token->type = (token_type == NAME) ? _get_keyword_or_name_type(p, start, (int)(end - start)) : token_type;
     token->bytes = PyBytes_FromStringAndSize(start, end - start);
     if (token->bytes == NULL) {
@@ -998,12 +997,42 @@ _PyPegen_name_from_token(Parser *p, Token* t)
                        t->end_col_offset, p->arena);
 }
 
+static expr_ty
+_PyPegen_invalidname_from_token(Parser *p, Token* t)
+{
+    
+    if (t == NULL) {
+        return NULL;
+    }
+    const char *s = PyBytes_AsString(t->bytes);
+    if (!s) {
+        p->error_indicator = 1;
+        return NULL;
+    }
+    PyObject *id = _PyPegen_new_identifier(p, s);
+    
+    if (id == NULL) {
+        p->error_indicator = 1;
+        return NULL;
+    }
+    fprintf(stderr, "INVALIDNAMEFROMTOKEN %d %d\n", t->lineno, t->col_offset);
+    return _PyAST_Name(id, Load, t->lineno, t->col_offset, t->end_lineno,
+                       t->end_col_offset, p->arena);
+}
+
 
 expr_ty
 _PyPegen_name_token(Parser *p)
 {
     Token *t = _PyPegen_expect_token(p, NAME);
     return _PyPegen_name_from_token(p, t);
+}
+
+expr_ty
+_PyPegen_invalidname_token(Parser *p)
+{
+    Token *t = _PyPegen_expect_token(p, INVALIDNAME);
+    return _PyPegen_invalidname_from_token(p, t);
 }
 
 void *

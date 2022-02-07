@@ -13,6 +13,8 @@
 
 .. data:: DEDENT
 
+.. data:: INVALIDNAME
+
 .. data:: LPAR
 
    Token value for ``"("``.

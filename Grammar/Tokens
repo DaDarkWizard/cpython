@@ -5,6 +5,7 @@ STRING
 NEWLINE
 INDENT
 DEDENT
+INVALIDNAME
 
 LPAR                    '('
 RPAR                    ')'

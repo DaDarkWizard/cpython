@@ -1253,6 +1253,58 @@ verify_end_of_number(struct tok_state *tok, int c, const char *kind)
     if (r) {
         tok_backup(tok, c);
         if (parser_warn(tok, "invalid %s literal", kind)) {
+            printf("hello");
+            return 0;
+        }
+        tok_nextc(tok);
+    }
+    else /* In future releases, only error will remain. */
+    if (is_potential_identifier_char(c)) {
+        tok_backup(tok, c);
+        //syntaxerror(tok, "invalid %s literal", kind);
+        return 0;
+    }
+    return 1;
+}
+
+
+static int
+verify_invalid_name(struct tok_state *tok, int c, const char *kind)
+{
+    /* Emit a deprecation warning only if the numeric literal is immediately
+     * followed by one of keywords which can occurr after a numeric literal
+     * in valid code: "and", "else", "for", "if", "in", "is" and "or".
+     * It allows to gradually deprecate existing valid code without adding
+     * warning before error in most cases of invalid numeric literal (which
+     * would be confusiong and break existing tests).
+     * Raise a syntax error with slighly better message than plain
+     * "invalid syntax" if the numeric literal is immediately followed by
+     * other keyword or identifier.
+     */
+    int r = 0;
+    if (c == 'a') {
+        r = lookahead(tok, "nd");
+    }
+    else if (c == 'e') {
+        r = lookahead(tok, "lse");
+    }
+    else if (c == 'f') {
+        r = lookahead(tok, "or");
+    }
+    else if (c == 'i') {
+        int c2 = tok_nextc(tok);
+        if (c2 == 'f' || c2 == 'n' || c2 == 's') {
+            r = 1;
+        }
+        tok_backup(tok, c2);
+    }
+    else if (c == 'o') {
+        r = lookahead(tok, "r");
+    }
+    if (r) {
+        tok_backup(tok, c);
+        if (parser_warn(tok, "invalid %s literal", kind)) {
+            fprintf(stderr, "Digit1");
             return 0;
         }
         tok_nextc(tok);
@@ -1261,10 +1313,12 @@ verify_end_of_number(struct tok_state *tok, int c, const char *kind)
     if (is_potential_identifier_char(c)) {
         tok_backup(tok, c);
         syntaxerror(tok, "invalid %s literal", kind);
+        fprintf(stderr, "Digit3");
         return 0;
     }
     return 1;
 }
+
 
 /* Verify that the identifier follows PEP 3131.
    All identifier strings are guaranteed to be "ready" unicode objects.
@@ -1911,7 +1965,21 @@ tok_get(struct tok_state *tok, const char **p_start, const char **p_end)
                     }
                 }
                 else if (!verify_end_of_number(tok, c, "decimal")) {
-                    return ERRORTOKEN;
+                    c = tok_nextc(tok);
+                    while (is_potential_identifier_char(c)) {
+                        if (c >= 128) {
+                            nonascii = 1;
+                        }
+                        c = tok_nextc(tok);
+                    }
+                    tok_backup(tok, c);
+                    if (nonascii && !verify_identifier(tok)) {
+                        return ERRORTOKEN;
+                    }
+
+                    *p_start = tok->start;
+                    *p_end = tok->cur;
+                    return INVALIDNAME;
                 }
             }
         }
@@ -2026,7 +2094,7 @@ tok_get(struct tok_state *tok, const char **p_start, const char **p_end)
     case '[':
     case '{':
         if (tok->level >= MAXLEVEL) {
-            return syntaxerror(tok, "too many nested parentheses");
+            return syntaxerror(tok, "too many nested parentheses. Max: %d", MAXLEVEL);
         }
         tok->parenstack[tok->level] = c;
         tok->parenlinenostack[tok->level] = tok->lineno;
