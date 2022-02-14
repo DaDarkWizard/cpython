@@ -6,6 +6,74 @@
 #include "pegen.h"
 #include "string_parser.h"
 
+typedef struct mypython_error_node {
+    enum mypython_error_type typeOfError;
+    int rowStart;
+    int rowEnd;
+    int colStart;
+    int colEnd;
+    struct mypython_error_node * next;
+} mypython_error_node_t;
+
+static mypython_error_node_t * head = NULL;
+
+void mypython_throw_special_error(enum mypython_error_type type, int rowStart,
+                        int colStart, int rowEnd, int colEnd)
+{
+    mypython_error_node_t * current = head;
+    if(current != NULL)
+    {
+        if(current->typeOfError == type &&
+                current->rowStart == rowStart && current->rowEnd == rowEnd &&
+                current->colStart == colStart && current->colEnd == colEnd)
+        {
+            return;
+        }
+        while (current->next != NULL)
+        {
+            current = current->next;
+            if(current->typeOfError == type &&
+                current->rowStart == rowStart && current->rowEnd == rowEnd &&
+                current->colStart == colStart && current->colEnd == colEnd)
+            {
+                return;
+            }
+        }
+        current->next = malloc(sizeof(mypython_error_node_t));
+        if(current->next == NULL)
+        {
+            fprintf(stderr, "Failure when trying to malloc for special error!\n");
+            exit(-1);
+        }
+        current = current->next;
+    }
+    else
+    {
+        current = malloc(sizeof(mypython_error_node_t));
+        if(current == NULL)
+        {
+            fprintf(stderr, "Failure when trying to malloc for special error!\n");
+            exit(-1);
+        }
+        head = current;
+    }
+    current->next = NULL;
+    current->rowEnd = rowEnd;
+    current->colEnd = colEnd;
+    current->colStart = colStart;
+    current->rowStart = rowStart;
+    current->typeOfError = type;
+
+    if(type == functionName)
+    {
+        fprintf(stderr, "ERROR: You are not using a valid function name on line %d column %d.\n", rowStart, colStart);
+    }
+    else if (type == nameUsage)
+    {
+        fprintf(stderr, "ERROR: You are using an invalid name on line %d column %d.\n", rowStart, colStart);
+    }
+}
+
 PyObject *
 _PyPegen_new_type_comment(Parser *p, const char *s)
 {

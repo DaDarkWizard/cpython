@@ -5,6 +5,7 @@
 #include <Python.h>
 #include <token.h>
 #include <pycore_ast.h>
+#include "specialwarnings.h"
 
 #if 0
 #define PyPARSE_YIELD_IS_KEYWORD        0x0001
@@ -22,6 +23,12 @@
 #define PyPARSE_BARRY_AS_BDFL 0x0020
 #define PyPARSE_TYPE_COMMENTS 0x0040
 #define PyPARSE_ASYNC_HACKS   0x0080
+
+enum mypython_error_type { functionName, nameUsage };
+
+void mypython_throw_special_error(enum mypython_error_type type, int rowStart,
+                        int colStart, int rowEnd, int colEnd);
+
 
 typedef struct _memo {
     int type;
