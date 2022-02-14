@@ -1015,7 +1015,6 @@ _PyPegen_invalidname_from_token(Parser *p, Token* t)
         p->error_indicator = 1;
         return NULL;
     }
-    fprintf(stderr, "INVALIDNAMEFROMTOKEN %d %d\n", t->lineno, t->col_offset);
     return _PyAST_Name(id, Load, t->lineno, t->col_offset, t->end_lineno,
                        t->end_col_offset, p->arena);
 }
@@ -1032,7 +1031,8 @@ expr_ty
 _PyPegen_invalidname_token(Parser *p)
 {
     Token *t = _PyPegen_expect_token(p, INVALIDNAME);
-    return _PyPegen_invalidname_from_token(p, t);
+    expr_ty x = _PyPegen_invalidname_from_token(p, t);
+    return x;
 }
 
 void *

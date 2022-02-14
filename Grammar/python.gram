@@ -404,7 +404,7 @@ function_def_raw[stmt_ty]:
     | 'def' n=NAME '(' params=[params] ')' a=['->' z=expression { z }] &&':' tc=[func_type_comment] b=block {
         _PyAST_FunctionDef(n->v.Name.id,
                         (params) ? params : CHECK(arguments_ty, _PyPegen_empty_arguments(p)),
-                        b, NULL, a, NEW_TYPE_COMMENT(p, tc), EXTRA) }
+                        b, NULL, a, NEW_TYPE_COMMENT(p, tc), EXTRA);fprintf(stderr, "You are using a valid function name on line %d column %d.\n", n->lineno, n->col_offset); }
     | 'def' n=INVALIDNAME '(' params=[params] ')' a=['->' z=expression { z }] &&':' tc=[func_type_comment] b=block {
             _PyAST_FunctionDef(n->v.Name.id,
                         (params) ? params : CHECK(arguments_ty, _PyPegen_empty_arguments(p)),
@@ -689,7 +689,7 @@ slice[expr_ty]:
     | a=named_expression { a }
 atom[expr_ty]:
     | NAME
-    | a=INVALIDNAME { fprintf(stderr, "Invalid name used on line %d column %d.\n", a->lineno, a->col_offset) }
+    | a=INVALIDNAME { a;fprintf(stderr, "Invalid name used on line %d column %d.\n", a->lineno, a->col_offset) }
     | 'True' { _PyAST_Constant(Py_True, NULL, EXTRA) }
     | 'False' { _PyAST_Constant(Py_False, NULL, EXTRA) }
     | 'None' { _PyAST_Constant(Py_None, NULL, EXTRA) }

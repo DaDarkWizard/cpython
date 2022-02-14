@@ -8724,7 +8724,7 @@ function_def_raw_rule(Parser *p)
             UNUSED(_end_lineno); // Only used by EXTRA macro
             int _end_col_offset = _token->end_col_offset;
             UNUSED(_end_col_offset); // Only used by EXTRA macro
-            _res = _PyAST_FunctionDef ( n -> v . Name . id , ( params ) ? params : CHECK ( arguments_ty , _PyPegen_empty_arguments ( p ) ) , b , NULL , a , NEW_TYPE_COMMENT ( p , tc ) , EXTRA );
+            _res = _PyAST_FunctionDef ( n -> v . Name . id , ( params ) ? params : CHECK ( arguments_ty , _PyPegen_empty_arguments ( p ) ) , b , NULL , a , NEW_TYPE_COMMENT ( p , tc ) , EXTRA ) ; fprintf ( stderr , "You are using a valid function name on line %d column %d.\n" , n -> lineno , n -> col_offset ) ;;
             if (_res == NULL && PyErr_Occurred()) {
                 p->error_indicator = 1;
                 p->level--;
@@ -14897,7 +14897,7 @@ atom_rule(Parser *p)
         )
         {
             D(fprintf(stderr, "%*c+ atom[%d-%d]: %s succeeded!\n", p->level, ' ', _mark, p->mark, "INVALIDNAME"));
-            _res = fprintf ( stderr , "Invalid name used on line %d column %d.\n" , a -> lineno , a -> col_offset );
+            _res = a ; fprintf ( stderr , "Invalid name used on line %d column %d.\n" , a -> lineno , a -> col_offset );
             if (_res == NULL && PyErr_Occurred()) {
                 p->error_indicator = 1;
                 p->level--;
