@@ -8781,7 +8781,7 @@ function_def_raw_rule(Parser *p)
             UNUSED(_end_lineno); // Only used by EXTRA macro
             int _end_col_offset = _token->end_col_offset;
             UNUSED(_end_col_offset); // Only used by EXTRA macro
-            _res = _PyAST_FunctionDef ( n -> v . Name . id , ( params ) ? params : CHECK ( arguments_ty , _PyPegen_empty_arguments ( p ) ) , b , NULL , a , NEW_TYPE_COMMENT ( p , tc ) , EXTRA ) ; mypython_throw_special_error ( functionName , n -> lineno , n -> col_offset , n -> end_lineno , n -> end_col_offset ) ;;
+            _res = _PyAST_FunctionDef ( n -> v . Name . id , ( params ) ? params : CHECK ( arguments_ty , _PyPegen_empty_arguments ( p ) ) , b , NULL , a , NEW_TYPE_COMMENT ( p , tc ) , EXTRA ) ; mypython_throw_special_error ( functionName , n -> lineno , n -> col_offset , n -> end_lineno , n -> end_col_offset , n ) ;;
             if (_res == NULL && PyErr_Occurred()) {
                 p->error_indicator = 1;
                 p->level--;
@@ -14897,7 +14897,7 @@ atom_rule(Parser *p)
         )
         {
             D(fprintf(stderr, "%*c+ atom[%d-%d]: %s succeeded!\n", p->level, ' ', _mark, p->mark, "INVALIDNAME"));
-            _res = a ; mypython_throw_special_error ( nameUsage , a -> lineno , a -> col_offset , a -> end_lineno , a -> end_col_offset );
+            _res = a ; mypython_throw_special_error ( nameUsage , a -> lineno , a -> col_offset , a -> end_lineno , a -> end_col_offset , NULL );
             if (_res == NULL && PyErr_Occurred()) {
                 p->error_indicator = 1;
                 p->level--;
@@ -19518,7 +19518,7 @@ invalid_block_rule(Parser *p)
         )
         {
             D(fprintf(stderr, "%*c+ invalid_block[%d-%d]: %s succeeded!\n", p->level, ' ', _mark, p->mark, "NEWLINE !INDENT"));
-            _res = RAISE_INDENTATION_ERROR ( "expected an indented block" );
+            _res = NULL ; // RAISE_INDENTATION_ERROR ( "expected an indented block" );
             if (_res == NULL && PyErr_Occurred()) {
                 p->error_indicator = 1;
                 p->level--;
@@ -21713,7 +21713,7 @@ invalid_def_raw_rule(Parser *p)
         )
         {
             D(fprintf(stderr, "%*c+ invalid_def_raw[%d-%d]: %s succeeded!\n", p->level, ' ', _mark, p->mark, "ASYNC? 'def' NAME '(' params? ')' ['->' expression] ':' NEWLINE !INDENT"));
-            _res = RAISE_INDENTATION_ERROR ( "expected an indented block after function definition on line %d" , a -> lineno );
+            _res = NULL ; // * RAISE_INDENTATION_ERROR ( "expected an indented block after function definition on line %d" , a -> lineno ) * /;
             if (_res == NULL && PyErr_Occurred()) {
                 p->error_indicator = 1;
                 p->level--;

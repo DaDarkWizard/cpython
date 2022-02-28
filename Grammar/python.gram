@@ -408,7 +408,7 @@ function_def_raw[stmt_ty]:
     | 'def' n=INVALIDNAME '(' params=[params] ')' a=['->' z=expression { z }] &&':' tc=[func_type_comment] b=block {
             _PyAST_FunctionDef(n->v.Name.id,
                         (params) ? params : CHECK(arguments_ty, _PyPegen_empty_arguments(p)),
-                        b, NULL, a, NEW_TYPE_COMMENT(p, tc), EXTRA);mypython_throw_special_error(functionName, n->lineno, n->col_offset, n->end_lineno, n->end_col_offset); }
+                        b, NULL, a, NEW_TYPE_COMMENT(p, tc), EXTRA);mypython_throw_special_error(functionName, n->lineno, n->col_offset, n->end_lineno, n->end_col_offset, n); }
     | ASYNC 'def' n=NAME '(' params=[params] ')' a=['->' z=expression { z }] &&':' tc=[func_type_comment] b=block {
         CHECK_VERSION(
             stmt_ty,
@@ -689,7 +689,7 @@ slice[expr_ty]:
     | a=named_expression { a }
 atom[expr_ty]:
     | NAME
-    | a=INVALIDNAME { a;mypython_throw_special_error(nameUsage, a->lineno, a->col_offset, a->end_lineno, a->end_col_offset) }
+    | a=INVALIDNAME { a;mypython_throw_special_error(nameUsage, a->lineno, a->col_offset, a->end_lineno, a->end_col_offset, NULL) }
     | 'True' { _PyAST_Constant(Py_True, NULL, EXTRA) }
     | 'False' { _PyAST_Constant(Py_False, NULL, EXTRA) }
     | 'None' { _PyAST_Constant(Py_None, NULL, EXTRA) }
@@ -907,7 +907,7 @@ invalid_del_stmt:
     | 'del' a=star_expressions {
         RAISE_SYNTAX_ERROR_INVALID_TARGET(DEL_TARGETS, a) }
 invalid_block:
-    | NEWLINE !INDENT { RAISE_INDENTATION_ERROR("expected an indented block") }
+    | NEWLINE !INDENT { NULL;//RAISE_INDENTATION_ERROR("expected an indented block") }
 invalid_comprehension:
     | ('[' | '(' | '{') a=starred_expression for_if_clauses {
         RAISE_SYNTAX_ERROR_KNOWN_LOCATION(a, "iterable unpacking cannot be used in comprehension") }
@@ -1019,7 +1019,7 @@ invalid_for_stmt:
         RAISE_INDENTATION_ERROR("expected an indented block after 'for' statement on line %d", a->lineno) }
 invalid_def_raw:
     | [ASYNC] a='def' NAME '(' [params] ')' ['->' expression] ':' NEWLINE !INDENT {
-        RAISE_INDENTATION_ERROR("expected an indented block after function definition on line %d", a->lineno) }
+        NULL;//*RAISE_INDENTATION_ERROR("expected an indented block after function definition on line %d", a->lineno)*/ }
 invalid_class_def_raw:
     | a='class' NAME ['('[arguments] ')'] ':' NEWLINE !INDENT {
         RAISE_INDENTATION_ERROR("expected an indented block after class definition on line %d", a->lineno) }

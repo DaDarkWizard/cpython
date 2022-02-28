@@ -27,7 +27,7 @@
 enum mypython_error_type { functionName, nameUsage };
 
 void mypython_throw_special_error(enum mypython_error_type type, int rowStart,
-                        int colStart, int rowEnd, int colEnd);
+                        int colStart, int rowEnd, int colEnd, expr_ty expression);
 
 
 typedef struct _memo {

@@ -13,12 +13,13 @@ typedef struct mypython_error_node {
     int colStart;
     int colEnd;
     struct mypython_error_node * next;
+    expr_ty expression;
 } mypython_error_node_t;
 
 static mypython_error_node_t * head = NULL;
 
 void mypython_throw_special_error(enum mypython_error_type type, int rowStart,
-                        int colStart, int rowEnd, int colEnd)
+                        int colStart, int rowEnd, int colEnd, expr_ty expression)
 {
     mypython_error_node_t * current = head;
     if(current != NULL)
@@ -63,6 +64,7 @@ void mypython_throw_special_error(enum mypython_error_type type, int rowStart,
     current->colStart = colStart;
     current->rowStart = rowStart;
     current->typeOfError = type;
+    current->expression = expression;
 
     if(type == functionName)
     {
