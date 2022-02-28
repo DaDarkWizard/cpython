@@ -19518,7 +19518,7 @@ invalid_block_rule(Parser *p)
         )
         {
             D(fprintf(stderr, "%*c+ invalid_block[%d-%d]: %s succeeded!\n", p->level, ' ', _mark, p->mark, "NEWLINE !INDENT"));
-            _res = NULL ; // RAISE_INDENTATION_ERROR ( "expected an indented block" );
+            _res = NULL ;  RAISE_INDENTATION_ERROR ( "expected an indented block" );
             if (_res == NULL && PyErr_Occurred()) {
                 p->error_indicator = 1;
                 p->level--;
